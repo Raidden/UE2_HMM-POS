@@ -1,0 +1,1 @@
+RUN: java -jar HMM.jar corpus.txt TestData.txt
