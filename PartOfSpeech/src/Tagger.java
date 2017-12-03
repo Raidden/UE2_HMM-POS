@@ -68,7 +68,7 @@ public class Tagger extends FileLoader {
 	
 	}
 	
-	public void countCat(Tagger tagger) throws Exception {
+	public void _init_(Tagger tagger) throws Exception {
 		
 		
 
@@ -313,9 +313,9 @@ public class Tagger extends FileLoader {
 		String[] tags = tagger.getBROWNECORPUSTAGS();
 		
 		
-		if (tockens.length==1) {
-			throw new Exception("No Tockens")  ;
-		}
+		//if (tockens.length==1) {
+		//	throw new Exception("No Tockens")  ;
+		//}
 		
 		String tag_i = "";
         String tag_j = "";

@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -9,30 +10,39 @@ public static void main(String[] args) throws Exception {
 		
 		
 		try {
-			
+		
+		File Fileright = new File("results.txt");
+
+        PrintWriter pw = new PrintWriter(Fileright);
 		
 		Tagger tagger = new  Tagger();
 		
 		//load tags from Folder
-		File folder = new File("brown_training");
-		tagger.loadTags(tagger, folder);
-		
-//		display Tags
-		System.out.println(Arrays.toString(tagger.getBROWNECORPUSTAGS()));
-		
-		String path = "text/corpus.txt";
-		
-
-		tagger.loadCorpus(tagger , folder , path );
+		//File trainingFolder = new File("brown_training");
+		//File testFolder = new File("testSet");
 		
 		
-		tagger.countCat(tagger);
+		//trainingFolder Hier
+		File trainingFolder = new File(args[0]);
 		
+		//testFolder hier
+		File testFolder = new File(args[1]);
 		
-		ArrayList< String > testSet= tagger.getTestSentences();
+		//load testSet
+		ArrayList<String> testSet = tagger.loadTestData(testFolder);
+		//load Tags
+		tagger.loadTags(tagger, trainingFolder);
 		
-				
-		String sentence = "Implementation/nn of/in Georgia's/np$ automobile/nn title/nn law/nn was/bedz also/rb recommended/vbn by/in the/at outgoing/jj jury/nn";
+		//load TrainingSet
+		tagger.loadCorpus(tagger , trainingFolder);
+		
+		System.out.println("Tags : \n"+Arrays.toString(tagger.getBROWNECORPUSTAGS()));
+		
+		//initialize HMM
+		tagger._init_(tagger);
+		
+		for (String sentence : testSet) {
+			
 		
 		String[] tmp = sentence.trim().split(" ");
 		int i= 0;
@@ -74,7 +84,10 @@ public static void main(String[] args) throws Exception {
 		System.out.println();
 		System.out.println("Accuracy = "  +  accuracy/(tockens.length));
 		
+		tagger.writeResult(tagger, b, tmp, pw);
+		}
 		
+		pw.close();
 		
 		} catch (Exception e) {
 			try {

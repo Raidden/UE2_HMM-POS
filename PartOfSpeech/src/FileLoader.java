@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.TreeMap;
 
-public class FileLoader {
+public class FileLoader extends Writer {
 	
 	
 	public void loadTags(Tagger tagger, File folder ) {
@@ -78,7 +78,7 @@ public class FileLoader {
 	}
 	
 	
-	 public static  void loadCorpus(Tagger tagger, File folder , String testPath)
+	 public static  void loadCorpus(Tagger tagger, File folder)
 			    throws IOException {
 		 try {
 			 
@@ -129,7 +129,6 @@ public class FileLoader {
 				}
 			    
 			    tagger.setTestSentences(testSentences);
-			    tagger.setSentences(sentences);
 			    tagger.setTockenTags(tockenTags);
 			    
 			 
@@ -140,6 +139,47 @@ public class FileLoader {
 					// TODO: handle exception
 				}
 			  }
+	 
+	 	public ArrayList<String> loadTestData(File testFolder) {
+	 		// TODO Auto-generated method stub
+	 		System.out.println("----------------");
+	 		ArrayList<String[]> testSentences = new ArrayList<>();
+	 		ArrayList<String> testSentences_ = new ArrayList<>();
+	 		try {
+	 			
+
+				File[] listOfFiles = testFolder.listFiles();
+
+				for (File file : listOfFiles) {
+				    if (file.isFile()) {
+				    	
+				    	BufferedReader br = new BufferedReader(new FileReader(file));
+					    String line;
+					    while( (line = br.readLine()) != null){
+					    	line=line.trim();
+					    	if (line.length()>1 && !line.equals("")) {
+					    		String [] tmp= line.split("\\./\\.");
+					    		testSentences.add(tmp);
+							}
+					    }
+				    }
+				}
+	 			
+				for (String[] s : testSentences ) {
+					for (String st : s) {
+						testSentences_.add(st);
+//						System.out.println(st);
+					}
+				}
+				
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+				
+				return testSentences_;
+	 		
+	 	}
+	 
 
 			  private static String removePunctuation(String token) {
 			    token = token.replaceAll("   ", " ");
