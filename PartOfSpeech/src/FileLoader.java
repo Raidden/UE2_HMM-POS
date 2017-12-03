@@ -1,4 +1,6 @@
+import java.awt.List;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -7,61 +9,132 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.TreeMap;
 
 public class FileLoader {
 	
-	 public static  void loadCorpus(Tagger tagger, String trainingPath , String testPath)
+	
+	public void loadTags(Tagger tagger, File folder ) {
+		
+		String [] rem = {".", "1", "16", "16''","be", "bed", "16-inch", "2", "2%", "2''","under", "2-foot", 
+				"2-inch", "2-story", "20th", "29", "3", "3%", "32''", "4", "4''", "50th", "64''", 
+				"7", "7074", "8", "8''", "8-inch", "8-inch-thick", "9", ":", "Output","active" , "cell" , 
+				"chamber" , "cs", "cwt", "day", "destination", "do", "dod", "doz", "sec", "to",""};
+		
+		
+		// TODO Auto-generated method stub
+		ArrayList<String[]> tockenTags = new ArrayList<>();
+		TreeMap<String, Integer> tags = new TreeMap<>();
+		ArrayList<String> TAGS = new ArrayList<>();
+		try {
+			
+			
+			File[] listOfFiles = folder.listFiles();
+
+			for (File file : listOfFiles) {
+			    if (file.isFile()) {
+//			    	System.out.println(file.getName());
+			    	BufferedReader br = new BufferedReader(new FileReader(file));
+				    
+					   
+				    String line;
+				    while( (line = br.readLine()) != null){
+				    	line=line.trim();
+				        String[] tokens =line.split(" "); 
+				        
+				    	for (String t : tokens) {
+				    		t=t.trim();
+				    		if (!t.contains("./.") && !t.equals("") && !t.equals(" ") && t.contains("/")) {
+				    			tockenTags.add(t.split("/"));
+//				    			
+				    		}
+						}
+				    }
+				    
+				    for (String[] string : tockenTags) {
+						
+			    		tags.put(string[1], 0);
+			    		
+					}
+			    
+			    }
+			}
+			
+			
+			for (String string : tags.keySet()) {
+				if (!Arrays.asList(rem).contains(string)) {
+					TAGS.add(string);
+				}
+				
+				
+			}
+//			System.out.println(TAGS.size());
+			
+		    tagger.setBROWNECORPUSTAGS(TAGS);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+	}
+	
+	
+	 public static  void loadCorpus(Tagger tagger, File folder , String testPath)
 			    throws IOException {
-		 		
+		 try {
+			 
 		 		ArrayList<String[]> tockenTags = new ArrayList<String[]>();
 			    ArrayList<String> sentences = new ArrayList<>();
 			    ArrayList<String> testSentences = new ArrayList<>();
 			    
-		 		try {
-					
-				 
-		 		String file = trainingPath;
-			    BufferedReader br = new BufferedReader(new FileReader(file));
+			    
+				
+				File[] listOfFiles = folder.listFiles();
+				
+				for (File filee : listOfFiles) {
+				    if (filee.isFile()) {
+		 		BufferedReader br = new BufferedReader(new FileReader(filee));
 			    
 			   
 			    String line;
-			    while( (line = br.readLine()) != null){
-			    	
-			        String[] tokens =line.split(" "); 
-			        
-			    	for (String t : tokens) {
-						tockenTags.add(t.split("="));
-					}
-			    	
-			    	String[] tmp = line.split("\\.=\\.");
-			    	for (String t : tmp) {
-			    		sentences.add(t);	
-					}
-			    	
-			    }
 			    
-			    BufferedReader tr = new BufferedReader(new FileReader(testPath));
-			    String line_;
-			    while ((line_ = tr.readLine())!=null) {
-			    	line_=line_.trim();
-			    	if (line_.length()>0) {
-			    		String[] sentence =line_.split("\\.=\\.");
-				    	
-				    	for (String sntc : sentence) {
-				    			if (!sntc.equals("") ) {
-						    		testSentences.add(sntc);	
-								}
-				    			
-					}
+			    while( (line = br.readLine()) != null){
+			    	if (line.length()!=0) {
+						line=line.trim();
+					
+			        String[] tokens =line.split(" "); 
+			       
+			    	for (String t : tokens) {
+			    		
+			    		
+			    		t=t.trim();
+			    		if (t.length()!=0 && !t.equals("")&&t.contains("/")&&!t.contains("./.")&&!t.equals("./.")) {
+			    			t=t.trim();
+							tockenTags.add(t.split("/"));
+//							System.out.println(t);
+			    		}
+			    		
 					}
 			    	
+			    	String[] tmp = line.split("\\./\\.");
+			    	for (String t : tmp) {
+			    		t=t.trim();
+			    		if (t.length()!=0&&!t.equals("")) {
+			    			sentences.add(t);
+					 
+			    	 }
+			    	}
+			       }
+			      }
+				 }
 				}
 			    
 			    tagger.setTestSentences(testSentences);
 			    tagger.setSentences(sentences);
 			    tagger.setTockenTags(tockenTags);
+			    
+			 
+			    
 
-//			    System.out.println(Arrays.toString(Sentences.toArray()));
 			    
 		 		} catch (Exception e) {
 					// TODO: handle exception
@@ -73,38 +146,4 @@ public class FileLoader {
 			    token = token.replaceAll("/n", "");
 			    return token;
 			  }
-
-			  public void createTestData(Tagger tagger) {
-				// TODO Auto-generated method stub
-				  int i =0;
-				  ArrayList< String> sentences = tagger.getSentences();
-				  PrintWriter writer;
-				  Random Dice = new Random(); 
-				  int n = 0;
-				try {
-					 writer = new PrintWriter("TestData.txt", "UTF-8");
-					 
-					 while (i<5) {
-					
-						 n = Dice.nextInt((sentences.size()-2)/1000);
-						 writer.println(" "+sentences.get(n)+ " .=.");
-						 
-				     i++;
-					}
-					 
-					 writer.close();
-					 
-					 
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				 
-			}
-			
-			  
-			  
 }
