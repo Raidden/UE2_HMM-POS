@@ -1,5 +1,5 @@
-import java.awt.List;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,11 +7,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map.Entry;
-import java.lang.*;
 import java.time.format.ResolverStyle;
 import java.util.TreeMap;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.activation.MailcapCommandMap;
 
@@ -22,10 +26,10 @@ public class Tagger extends FileLoader {
 	 final static String[] TAGS = { "NOUN", "VERB", "ADJ", "ADV", "PRON", "DET", "ADP", "NUM", "CONJ","PRT", ".", "X"} ;
 	//pi
 	 
-	public static ArrayList<String> BROWNECORPUSTAGS = new ArrayList<>();
+	public static List<String> BROWNECORPUSTAGS = new ArrayList<String>();
 	
 	
-	public static void setBROWNECORPUSTAGS(ArrayList<String> bROWNECORPUSTAGS) {
+	public static void setBROWNECORPUSTAGS(List<String> bROWNECORPUSTAGS) {
 		BROWNECORPUSTAGS = bROWNECORPUSTAGS;
 	}
 	public String[]  getBROWNECORPUSTAGS() {
@@ -226,7 +230,7 @@ public class Tagger extends FileLoader {
 		tagger.setMap_2d(prevActualMap);
 		setTagTockenMap(tagTockenMap);
 		setMap(tagMapp);
-		
+		System.out.println("Model was trained.");
 		
 	}
 	
@@ -313,9 +317,10 @@ public class Tagger extends FileLoader {
 		String[] tags = tagger.getBROWNECORPUSTAGS();
 		
 		
-		//if (tockens.length==1) {
-		//	throw new Exception("No Tockens")  ;
-		//}
+//		if (tockens.length==1) {
+//			throw new Exception("No Tockens")  ;
+//		}
+		
 		
 		String tag_i = "";
         String tag_j = "";
@@ -323,6 +328,7 @@ public class Tagger extends FileLoader {
 		ArrayList<String> result = new ArrayList<>();
 		ArrayList<Double[]> delta = new ArrayList<>();
 		ArrayList<Double[]> back= new ArrayList<>();
+		
 		
 		for(String t : tockens) {
 			
@@ -355,6 +361,7 @@ public class Tagger extends FileLoader {
 			 t = tags[i];
 			 
 			 //System.out.println(tagTockenMap);
+			 
 			if (tagTockenMap.get(t).containsKey(tockens[0])) {
 				
 				b = tagTockenMap.get(t).get(tockens[0]);
@@ -371,7 +378,6 @@ public class Tagger extends FileLoader {
 		for (int i = 0; i < delta.size()-1; i++) {
 			//System.out.println(delta.get(0)[i]);
 		}
-		
 		
 		for (int i = 1; i < tockens.length-1; i++) {
 			for (int j = 0; j < tags.length; j++) {
@@ -390,6 +396,10 @@ public class Tagger extends FileLoader {
 				  }
 				  back.get(i)[j] = max_i;
 			      tag_j = tags[j];
+//			      
+//			      System.out.println(tockens[i]);
+//			      System.out.println(tagTockenMap.get(tag_j));
+			      
 			      
 			      if( tagTockenMap.get(tag_j).containsKey(tockens[i])) {
 			    	  b=tagTockenMap.get(tag_j).get(tockens[i]);
@@ -400,6 +410,7 @@ public class Tagger extends FileLoader {
 		}
 		
 		for (Double[] doubles : delta) {
+			
 			result.add(tags[Arrays.asList(doubles).indexOf(Collections.max(Arrays.asList((doubles))))]);
 		}
 		
@@ -418,4 +429,41 @@ public class Tagger extends FileLoader {
 		return result;
 	}
 	
+	
+	public void loadModelFromExecDir() {
+		System.out.println("Loading Model from execution directory ...");
+		ObjectMapper mapper = new ObjectMapper();
+		
+		File readFrom = new File("model.json");
+		Model model = new Model();
+		try {
+			model = mapper.readValue(readFrom, Model.class);
+			
+			this.setMap_2d(model.getPrevActualMap());
+			this.setTagTockenMap(model.getTagTockenMap());
+			this.setMap(model.getTagFrequency());
+			this.setBROWNECORPUSTAGS(Arrays.asList(model.getBrownCorpusTags()));
+			
+		} catch (JsonParseException e) {
+			System.out.println("Failed to read model due to parsing exception: " + e.getLocalizedMessage());
+		} catch (JsonMappingException e) {
+			System.out.println("Failed to read model due to mapping exception: " + e.getLocalizedMessage());
+		} catch (IOException e) {
+			System.out.println("Failed to read model from file " + readFrom.getAbsolutePath());
+		}
+	}
+	
+	public void writeModelToExecDir() {
+		ObjectMapper mapper = new ObjectMapper();
+		Model model = new Model(this.tagFrequency, this.prevActualMap, this.tagTockenMap, this.getBROWNECORPUSTAGS());
+        
+		try {
+			File modelDestination = new File("model.json");
+            System.out.println("Exporting model to " + modelDestination.getAbsolutePath());
+            mapper.writeValue(modelDestination, model);
+        } catch (IOException e) {
+            System.out.println("Failed to write model to file. " + e);
+        }
+	}
+ 	
 }
