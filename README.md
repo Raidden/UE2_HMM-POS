@@ -8,5 +8,5 @@ Train Mode:
 
 Annotate Mode:
 
-```java -jar annotate <path to test data> <path to write output file>``
+``java -jar annotate <path to test data> <path to write output file>``
 
