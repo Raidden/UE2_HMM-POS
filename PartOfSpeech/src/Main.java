@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 public class Main {
 
@@ -39,74 +40,101 @@ public static void main(String[] args) throws Exception {
 			Tagger tagger = new  Tagger();
 			tagger.loadModelFromExecDir();
 			//load testSet
-			ArrayList<String> testSet = tagger.loadTestData(testFolder);
-
+			Map<String,ArrayList<String>> testMap = tagger.loadTestData(testFolder);
+			
+			String[] typeStringArray = new String[0];
+			String[] testSetKeys = testMap.keySet().toArray(typeStringArray);
 			
 			//initialize HMM
 			if (args[2].isEmpty()) {
 				System.out.println("Please provide an output directory");
 				return;
 			}
-			File Fileright = new File(args[2]+"/results.txt");
-	        PrintWriter pw = new PrintWriter(Fileright);
+			
+			String outputPath = args[2];
+			if (outputPath.charAt(outputPath.length()-1) != '/') outputPath += "/";
+			
+			int totalTokenCount = 0;
 			double totalAccuracy = 0.0;
+			int docCount=0;
 			
-			
-			for (String sentence : testSet) {
-				
-				String[] sentenceTokens = sentence.trim().split(" ");
-				int i= 0;
-				String[] tags = new String[sentenceTokens.length];
-				String[] tockens = new String[sentenceTokens.length];
-				
-				
-				for (String t : sentenceTokens) {
-					if (t.indexOf("/")!=-1) {
-						tags[i] = t.substring(t.indexOf("/")+1, t.length());
-						tockens[i] = t.substring( 0 , t.indexOf("/"));	
-					}else {
-						//throw new Exception("Sentence not Valid");
-						
+			for(int i = 0; i < testSetKeys.length; i++) {
+				// ITERATING THROUGH FILES
+				docCount ++;
+				String fileName = testSetKeys[i];
+				File file = new File(outputPath+fileName);
+		        PrintWriter pw = new PrintWriter(file);
+		        
+		        int documentTokenCount = 0;
+		        double documentAccuracy = 0.0;
+		        
+		        ArrayList<String>testSet = testMap.get(fileName);
+		        
+		        for (String sentence : testSet) {
+					// ITERATING THROUGH SENTENCES IN FILE
+					String[] sentenceTokens = sentence.trim().split(" ");
+					int j= 0;
+					String[] tags = new String[sentenceTokens.length];
+					String[] tockens = new String[sentenceTokens.length];
+					
+					
+					for (String t : sentenceTokens) {
+						if (t.indexOf("/")!=-1) {
+							tags[j] = t.substring(t.indexOf("/")+1, t.length());
+							tockens[j] = t.substring( 0 , t.indexOf("/"));	
+						}else {
+							//throw new Exception("Sentence not Valid");
+							
+						}
+						j++;
 					}
-					i++;
-				}
-				
-				
-				
-				ArrayList< String > estimatedTags = tagger.veterbiTags(tagger, tockens);
-				String result = "";
-				
-				for (String str : estimatedTags) {
-					result+= str + " ";
-				}
-				
-				result = "[ "+result+"]";
-				System.out.println();
-				System.out.println(sentence);
-				System.out.println();
-				
-				double accuracy = 0.0;
-				for (int j = 0; j < tockens.length; j++) {
-					if (tags[j].equals(estimatedTags.get(j))) {
-						accuracy++; 
+					
+					
+					
+					ArrayList< String > estimatedTags = tagger.veterbiTags(tagger, tockens);
+					String result = "";
+					
+					for (String str : estimatedTags) {
+						result+= str + " ";
 					}
-					System.out.println("Guessed : " + estimatedTags.get(j) + "     Actual : " + tags[j]);
+					
+					result = "[ "+result+"]";
+					System.out.println();
+					System.out.println(sentence);
+					System.out.println();
+					
+					double accuracy = 0.0;
+					for (int k = 0; k < tockens.length; k++) {
+						documentTokenCount++;
+						if (tags[k].equals(estimatedTags.get(k))) {
+							accuracy++;
+							documentAccuracy++;
+						}
+						System.out.println("Guessed : " + estimatedTags.get(k) + "     Actual : " + tags[k]);
+					}
+					
+					System.out.println();
+					System.out.println("Accuracy = "  +  accuracy/(tockens.length));
+					
+					
+					tagger.writeResult(tagger, estimatedTags, sentenceTokens, pw);
+				
 				}
-				System.out.println();
-				System.out.println("Accuracy = "  +  accuracy/(tockens.length));
-				
-				totalAccuracy += accuracy/(tockens.length);
-				
-	
-				tagger.writeResult(tagger, estimatedTags, sentenceTokens, pw);
-			
+		        
+		        totalAccuracy += documentAccuracy;
+		        totalTokenCount += documentTokenCount;
+		        
+		        documentAccuracy /= documentTokenCount;
+		        
+		        System.out.println("Document accuracy: " + documentAccuracy);
+				pw.close();
+		        
 			}
-
-
 			
-			System.out.println("Total accuracy: " + totalAccuracy/testSet.size());
-			pw.close();
+			totalAccuracy /= totalTokenCount;
 			
+			System.out.println("Total accuracy: " + totalAccuracy);
+	
 		}
 		else if (args[0].isEmpty()) {
 			System.out.println("Please specify a mode.");

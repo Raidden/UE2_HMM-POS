@@ -8,6 +8,9 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -140,43 +143,50 @@ public class FileLoader extends Writer {
 				}
 			  }
 	 
-	 	public ArrayList<String> loadTestData(File testFolder) {
+	 	public Map<String,ArrayList<String>> loadTestData(File testFolder) {
 	 		// TODO Auto-generated method stub
 	 		System.out.println("----------------");
-	 		ArrayList<String[]> testSentences = new ArrayList<>();
-	 		ArrayList<String> testSentences_ = new ArrayList<>();
+	 		
+	 		Map<String,ArrayList<String>> fileSentenceMap = new LinkedHashMap<String,ArrayList<String>>();
+	 		
 	 		try {
 	 			
 
 				File[] listOfFiles = testFolder.listFiles();
 
 				for (File file : listOfFiles) {
+
+			 		ArrayList<String> testSentences = new ArrayList<>();
+					
 				    if (file.isFile()) {
 				    	
-				    	BufferedReader br = new BufferedReader(new FileReader(file));
+				    		BufferedReader br = new BufferedReader(new FileReader(file));
 					    String line;
+					    
 					    while( (line = br.readLine()) != null){
-					    	line=line.trim();
-					    	if (line.length()>1 && !line.equals("")) {
-					    		String [] tmp= line.split("\\./\\.");
-					    		testSentences.add(tmp);
+						    	line=line.trim();
+						    	if (line.length()>1 && !line.equals("")) {
+						    		
+						    		String [] sentence= line.split("\\./\\.");
+						    		
+						    		for (String st : sentence) {
+									testSentences.add(st);
+								}
 							}
 					    }
+					    
+					    fileSentenceMap.put(file.getName(), testSentences);
+						br.close();
 				    }
 				}
 	 			
-				for (String[] s : testSentences ) {
-					for (String st : s) {
-						testSentences_.add(st);
-//						System.out.println(st);
-					}
-				}
+				
 				
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
 				
-				return testSentences_;
+	 		return fileSentenceMap;
 	 		
 	 	}
 	 
