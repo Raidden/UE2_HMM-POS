@@ -344,7 +344,7 @@ public class Tagger extends FileLoader {
 			//System.out.println(delta.get(0)[i]);
 		}
 		
-		for (int i = 1; i < tockens.length-1; i++) {
+		for (int i = 1; i < tockens.length; i++) {
 			for (int j = 0; j < tags.length; j++) {
 				  max_i = 0;
 				  max_val = -1;
