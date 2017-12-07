@@ -23,7 +23,6 @@ public class Tagger extends FileLoader {
 	 final static double PI_SMOUTH = 1e-10;
 	 final static double A_SMOUTH = 1e-10;
 	 final static double B_SMOUTH = 1e-10;
-	 final static String[] TAGS = { "NOUN", "VERB", "ADJ", "ADV", "PRON", "DET", "ADP", "NUM", "CONJ","PRT", ".", "X"} ;
 	//pi
 	 
 	public static List<String> BROWNECORPUSTAGS = new ArrayList<String>();
@@ -275,41 +274,7 @@ public class Tagger extends FileLoader {
 	//split corpus in tokens + split tockens in [word,tag]
 
 	
-	public static ArrayList<String> mostProbableTag(String[] tokens ,   Tagger tagger) {
-		double val = .0;
-		
-		
-		TreeMap< String , TreeMap<String , Double>> tagTockMap =tagger.getTagTockenMap();
-		ArrayList<String> ret= new ArrayList<>();
-		 
-		for (String str : tokens) {
-			
-			double max_val = -1;
-			String max_tag = "";
-			for (String t : TAGS) {
-				
-				TreeMap<String , Double> temp = tagTockMap.get(t);
-				
-				if(temp.containsKey(str)) {
-					
-					val = temp.get(str);
-					//System.out.println(val);
-					if (val > max_val) {
-	                    max_val = val;
-	                    max_tag = t;
-				 }
-					
-				}
-				
-				 
-			}
-			
-			ret.add(max_tag);
-			
-		}
-		
-		return ret;
-	}
+	
 	
 	
 	
@@ -383,7 +348,7 @@ public class Tagger extends FileLoader {
 			for (int j = 0; j < tags.length; j++) {
 				  max_i = 0;
 				  max_val = -1;
-				  for (int k = 0; k < TAGS.length; k++) {
+				  for (int k = 0; k < tags.length; k++) {
 					  tag_i = tags[k];
 			          tag_j = tags[j];
 			          double val = delta.get(i-1)[k]* prevActualMap.get(tag_i).get(tag_j);

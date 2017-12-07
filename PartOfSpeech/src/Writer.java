@@ -22,7 +22,7 @@ public class Writer {
 				}
 			
 		if (line.contains("./.")) {
-			writer.append(("\n"+line.trim()));
+			writer.append((line.trim()+"\n"));
 		}else {
 			writer.append((line.trim()));
 		}
