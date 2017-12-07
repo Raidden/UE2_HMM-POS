@@ -1,12 +1,16 @@
 # UE2_HMM-POS
 
+Compile:
+
+``mvn clean package shade:shade``
+
 Run:
 
 Train Mode:
 
-``java -jar train <path to train data>``
+``java -jar target/uebung2-gruppeC.jar train <path to train data>``
 
 Annotate Mode:
 
-``java -jar annotate <path to test data> <path to write output file>``
+``java -jar target/uebung2-gruppeC.jar annotate <path to test data> <path to write output file>``
 
