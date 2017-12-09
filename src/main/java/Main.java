@@ -9,18 +9,13 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        String[] args1 = new String[3];
-        args1[0] = "annotate";
-        args1[1] = "/home/bill/Desktop/test";
-        args1[2] = "/home/bill/Desktop/results";
 
-
-        if (args1.length != 2 && args1.length != 3)
+        if (args.length != 2 && args.length != 3)
             System.out.println("Argument count insufficient; Please provide a mode name and at least one directory.");
-        else if (args1[0].equals("train")) {
+        else if (args[0].equals("train")) {
 
             //trainingFolder Hier
-            File trainingFolder = new File(args1[1]);
+            File trainingFolder = new File(args[1]);
 
             Tagger tagger = new Tagger();
 
@@ -34,14 +29,14 @@ public class Main {
 //			System.out.println("Tags : \n"+Arrays.toString(tagger.getBROWNECORPUSTAGS()));
             tagger.writeModelToExecDir();
 
-        } else if (args1[0].equals("annotate")) {
+        } else if (args[0].equals("annotate")) {
 
             // args[0]: Mode
             // args[1]: Input_Dir (Test Data)
             // args[2]: Output_Dir (Annotated File)
 
             //testFolder hier
-            File testFolder = new File(args1[1]);
+            File testFolder = new File(args[1]);
 
             Tagger tagger = new Tagger();
             tagger.loadModelFromExecDir();
@@ -52,12 +47,12 @@ public class Main {
             String[] testSetKeys = testMap.keySet().toArray(typeStringArray);
 
             //initialize HMM
-            if (args1[2].isEmpty()) {
+            if (args[2].isEmpty()) {
                 System.out.println("Please provide an output directory");
                 return;
             }
 
-            String outputPath = args1[2];
+            String outputPath = args[2];
             if (outputPath.charAt(outputPath.length() - 1) != '/') outputPath += "/";
 
             int totalTokenCount = 0;
